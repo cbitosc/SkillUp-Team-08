@@ -37,13 +37,15 @@ class AddCC(Resource):
         parser.add_argument('ph_no',type=str,required=True,help="Phone Number cannot be kept blank!")
         parser.add_argument('email',type=str,required=True,help="Email Adress cannot be kept blank!")
         data=parser.parse_args()
+
         try:
             x=query(f"""SELECT * FROM CC where roll_no = '{data["roll_no"]}'""",return_json=False)
+            
             if len(x)>0: 
                 return {"message" : "CC member already exists with this Roll_no!"},400
-            else: 
-                query(f""" insert into CC(name,roll_no,club_id,ph_no,email) 
-                         values('{data['name']}','{data['roll_no']}','{data['club_id']}','{data['ph_no']}','{data['email']}')""")
+            else:                
+                query(f"""insert into CC(name,roll_no,club_id,ph_no,email) values('{data['name']}','{data['roll_no']}',
+                            '{data['club_id']}','{data['ph_no']}','{data['email']}')""")
                 query(f"""insert into login_details(user_id,password,role) values('{data['roll_no']}','{data['roll_no']}','CC')""")
         except:
             return {"message" :"Error in details"},500
@@ -60,6 +62,61 @@ class AddCC(Resource):
             return {"message":"Succesfully sent a email given!"},201
         except:
             return {"message":"Unable to send mail"},500
+
+
+class AddClub(Resource):
+    def post(self):
+        parser=reqparse.RequestParser()
+        parser.add_argument('club_name',type=str,required=True,help="Club_name cannot be kept blank!")
+        parser.add_argument('club_id',type=int,required=True,help="Club_id cannot be kept blank!")
+        parser.add_argument('branch',type=str,required=True,help="Branch cannot be kept blank!")
+        data=parser.parse_args()
+        try:
+            x=query(f"""SELECT * FROM clubs where club_id = '{data["club_id"]}'""",return_json=False)
+            if len(x)>0: 
+                return {"message" : "Club already exists with this club_id!"},400
+            else: 
+                query(f""" insert into clubs(club_name,club_id,branch) 
+                         values('{data['club_name']}','{data['club_id']}','{data['branch']}')""")
+        except:
+            return {"message" :"Error in details"},500
+        return {"message":"Succesful"},201
+
+
+class ClubId(Resource):
+    def get(self):
+        try:
+            x=query(f"""select club_id from clubs """,return_json=False)
+            if(len(x)>0):
+                return query(f"""select club_id from clubs """,return_json=False)
+            else:
+                return {"message" : "No clubs are present!"},201
+        except:
+            return {"message" : "Can't connect to the table!"},500
+
+
+class EventDetails(Resource):
+    def get(self):
+        try:
+            x=query(f"""SELECT * FROM event_details""",return_json=False)
+            if (len(x)>0):
+                return query(f"""SELECT * FROM event_details""")
+            else:
+                return {"message" : "No events to display"},400
+        except:
+            return{"message":"Can't connect to events table"},500
+
+
+class CCdetails(Resource):
+    def get(self):
+        try:
+            x=query(f"""SELECT * FROM CC""",return_json=False)
+            if (len(x)>0):
+                return query(f"""SELECT * FROM CC""")
+            else:
+                return {"message" : "No CC member!"},400
+        except:
+            return{"message":"Can't connect to CC table"},500
 
 
 
